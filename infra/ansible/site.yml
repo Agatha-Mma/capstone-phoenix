@@ -1,0 +1,14 @@
+- hosts: all
+  become: true
+  roles:
+    - hardening
+
+- hosts: control_plane
+  become: true
+  roles:
+    - k3s-server
+
+- hosts: workers
+  become: true
+  roles:
+    - k3s-agent
