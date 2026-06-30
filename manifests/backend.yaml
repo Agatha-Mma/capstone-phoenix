@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: taskapp
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 5000
+      targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: taskapp
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: backend
+      containers:
+        - name: backend
+          image: ghcr.io/ts-a-devops/taskapp-backend:latest
+          command: ["gunicorn"]
+          args: ["--workers", "3", "--bind", "0.0.0.0:5000", "--access-logfile", "-", "run:app"]
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: taskapp-config
+          env:
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: taskapp-secret
+                  key: DATABASE_PASSWORD
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: taskapp-secret
+                  key: SECRET_KEY
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 15
