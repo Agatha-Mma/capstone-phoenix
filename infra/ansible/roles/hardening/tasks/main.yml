@@ -53,3 +53,10 @@
 
 - name: Ensure UFW is reloaded if forward policy changed
   meta: flush_handlers
+
+- name: Allow kubelet metrics port between cluster nodes
+  ufw:
+    rule: allow
+    port: "10250"
+    proto: tcp
+    from_ip: 10.0.1.0/24
