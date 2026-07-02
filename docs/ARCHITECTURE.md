@@ -1,47 +1,57 @@
-# Architecture (fill this in)
+# TaskApp Architecture
 
-## 1. Topology diagram
-> Draw it (ASCII, Excalidraw, draw.io — anything). Show: your nodes, where each TaskApp
-> tier runs, the ingress controller, and the request path.
+## Overview
 
-```
-[ replace with your diagram ]
+TaskApp is a 3-tier web application (React frontend + Flask backend + PostgreSQL database)
+deployed on a 3-node Kubernetes cluster on AWS EC2, with automated TLS, GitOps deployment,
+and horizontal autoscaling.
 
-  Internet ──DNS──▶ taskapp.<you>.dev / api.<you>.dev
-        │
-        ▼
-  ingress controller (node: ____)  ──TLS terminated by cert-manager──┐
-        │                                                            │
-        ▼                                                            ▼
-  frontend Service ──▶ frontend Pods (nodes: __, __)        backend Service ──▶ backend Pods (nodes: __, __)
-                              │  /api proxy                              │
-                              └────────────────────────────────────────▶│
-                                                                         ▼
-                                                          postgres Service ──▶ postgres-0 (PVC on node __)
-```
+## Infrastructure
 
-## 2. Node & network
-- Nodes (role, size, AZ/region): …
-- CIDR / subnet choices and why: …
-- Firewall: what's open to the world, what's internal, and why `6443` is closed: …
+- **Cloud:** AWS (us-east-1)
+- **Nodes:** 3 x t3.small EC2 instances
+  - 1 control plane (ip-10-0-1-203)
+  - 2 workers (ip-10-0-1-229, ip-10-0-1-146)
+- **Provisioned by:** Terraform (remote state in S3 + DynamoDB locking)
+- **Configured by:** Ansible (k3s install, UFW hardening, VXLAN networking)
 
-## 3. Request flow (one paragraph)
-> DNS → ingress → TLS → frontend → /api → backend → Postgres. Be specific about names/ports.
+## Kubernetes Components
 
-## 4. The single-server assumptions you fixed  ← graders look here
-> For each, name the assumption that was safe on one box but breaks on a cluster, and the
-> K8s mechanism you used. Minimum: migrations, persistent storage, traffic routing,
-> self-healing, zero-downtime deploys, secrets.
+| Component | Kind | Replicas | Purpose |
+|---|---|---|---|
+| postgres | StatefulSet | 1 | Persistent database with PVC |
+| backend | Deployment | 2-5 (HPA) | Flask API, gunicorn, health-checked |
+| frontend | Deployment | 2 | nginx serving React SPA, proxies /api to backend |
+| taskapp-migrate | Job | 1 (one-shot) | Runs alembic migrations before backend starts |
 
-| Single-server assumption | Why it breaks at scale | How you fixed it |
-|---|---|---|
-| migrate-on-boot in the entrypoint | 2+ replicas race on `alembic upgrade head` | … |
-| named volume on the host | Pods reschedule across nodes | … |
-| `ports:` published on the host | many Pods, many nodes, one front door needed | … |
-| … | … | … |
+## Request Flow
 
-## 5. Choices & trade-offs
-- Raw YAML vs Helm vs kustomize — why: …
-- ingress-nginx vs k3s Traefik — why: …
-- CNI / NetworkPolicy enforcement — what and why: …
-- Secrets approach (out-of-band vs Sealed/External Secrets) — why: …
+## Key Design Decisions
+
+| Decision | Reason |
+|---|---|
+| k3s instead of full k8s | Lightweight, includes Traefik + local-path-provisioner, suited for 3-node learner cluster |
+| Headless Service for Postgres | StatefulSet with stable DNS, no load balancing needed for single DB instance |
+| Job for migrations, not entrypoint | Prevents race condition when multiple backend replicas start simultaneously |
+| gunicorn command override in Deployment | Skips entrypoint migration step on replicas — proven safe since Job runs first |
+| DuckDNS + Let's Encrypt | Free, real HTTPS cert — no self-signed certs anywhere |
+| source_dest_check=false on EC2 | Required for Flannel VXLAN overlay network to route cross-node pod traffic |
+| UFW port 8472/udp + 10250/tcp open | Flannel VXLAN and kubelet metrics ports blocked by UFW by default — explicitly allowed |
+
+## What Kubernetes Solves vs Single-Server Docker
+
+| Problem (single server) | Solution (Kubernetes) |
+|---|---|
+| App dies if server reboots | Pods automatically restart, spread across nodes |
+| Can't handle traffic spikes | HPA scales backend 2→5 replicas under load |
+| Deployment causes downtime | RollingUpdate strategy — zero downtime deploys |
+| Manual deploys are error-prone | Argo CD GitOps — git push = auto deploy |
+| No resource guardrails | ResourceQuota limits CPU/memory per namespace |
+| Planned maintenance kills app | PodDisruptionBudget guarantees 1 replica always up |
+
+## Known Limitations / Future Improvements
+
+- DuckDNS domain changes if EC2 IP changes (use Elastic IP + Route53 in production)
+- Single Postgres instance (no replication) — use RDS or Postgres operator for HA
+- Flannel CNI does not enforce NetworkPolicy — use Calico for real network segmentation
+- Secrets managed manually (kubectl create secret) — use Sealed Secrets or Vault in production
