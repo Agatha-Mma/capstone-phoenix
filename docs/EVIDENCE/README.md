@@ -1,6 +1,5 @@
 # EVIDENCE
 
-Drop screenshots/logs here, named so a grader knows what each proves:
 
 - `nodes-ready.png` — multi-node `kubectl get nodes`
 - `pods-spread.png` — replicas on different nodes (`-o wide`)
