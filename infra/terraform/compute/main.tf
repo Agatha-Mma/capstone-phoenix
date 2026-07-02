@@ -18,6 +18,7 @@ resource "aws_instance" "control_plane" {
   subnet_id              = var.subnet_ids[0]
   vpc_security_group_ids = [var.sg_id]
   key_name               = var.key_name
+  source_dest_check      = false
   tags = {
     Name = "k3s-control-plane"
     Role = "server"
@@ -31,6 +32,7 @@ resource "aws_instance" "workers" {
   subnet_id              = var.subnet_ids[0]
   vpc_security_group_ids = [var.sg_id]
   key_name               = var.key_name
+  source_dest_check      = false
   tags = {
     Name = "k3s-worker-${count.index}"
     Role = "agent"
