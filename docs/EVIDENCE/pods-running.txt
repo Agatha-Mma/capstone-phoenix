@@ -1,0 +1,7 @@
+NAME                        READY   STATUS      RESTARTS   AGE     IP           NODE            NOMINATED NODE   READINESS GATES
+backend-6b97f64f79-79fs5    1/1     Running     0          61m     10.42.2.6    ip-10-0-1-229   <none>           <none>
+backend-6b97f64f79-wf2gh    1/1     Running     0          13m     10.42.0.22   ip-10-0-1-203   <none>           <none>
+frontend-7bdfb4cff8-g7nrq   1/1     Running     0          61m     10.42.2.7    ip-10-0-1-229   <none>           <none>
+frontend-7bdfb4cff8-jckd4   1/1     Running     0          3m26s   10.42.0.25   ip-10-0-1-203   <none>           <none>
+postgres-0                  1/1     Running     0          68m     10.42.2.4    ip-10-0-1-229   <none>           <none>
+taskapp-migrate-nxxdn       0/1     Completed   0          61m     10.42.2.5    ip-10-0-1-229   <none>           <none>

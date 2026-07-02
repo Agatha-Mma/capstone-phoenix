@@ -1,0 +1,4 @@
+NAME            STATUS   ROLES           AGE   VERSION
+ip-10-0-1-146   Ready    <none>          80m   v1.36.2+k3s1
+ip-10-0-1-203   Ready    control-plane   81m   v1.36.2+k3s1
+ip-10-0-1-229   Ready    <none>          80m   v1.36.2+k3s1

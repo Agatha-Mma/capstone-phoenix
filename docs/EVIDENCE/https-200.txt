@@ -1,0 +1,15 @@
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0  0   608    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+HTTP/2 200 
+accept-ranges: bytes
+cache-control: no-cache
+cache-control: no-cache
+content-type: text/html
+date: Thu, 02 Jul 2026 11:43:52 GMT
+etag: "6a29b2ff-260"
+expires: Thu, 02 Jul 2026 11:43:51 GMT
+last-modified: Wed, 10 Jun 2026 18:54:55 GMT
+server: nginx/1.31.1
+content-length: 608
+
