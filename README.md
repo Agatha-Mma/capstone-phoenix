@@ -192,3 +192,18 @@ Start by reading the K8s lesson, then open `STRUCTURE.md`.
 
 SUBMISSION LINK:
 https://docs.google.com/forms/d/e/1FAIpQLSdp-5Zfvt431gY8m2L_MOZ7NQ-8zN2L3jvkgL7P3yP7-pd94Q/viewform?usp=header
+
+LIVE DEMO 
+APP URL: https://taskapp-agatha.duckdns.org/dashboard
+
+LOGIN CREDENTIALS: 
+Username: userag
+Password: userag123
+
+Repo: https://github.com/Agatha-Mma/capstone-phoenix
+
+LIVE APPLICATION SCREENSHOT
+<img width="1920" height="1080" alt="Live Application" src="https://github.com/user-attachments/assets/be9aabc6-47b8-4e51-bf01-839f2df4b9d7" />
+
+
+
